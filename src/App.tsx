@@ -22,40 +22,38 @@ export default function App() {
   const [notificationCount] = useState(3);
 
   // تسجيل Service Worker للـ PWA
-  useEffect(() => {
-  // طلب إذن الإشعارات
-    Notification.requestPermission().then((permission) => {
-    if (permission === "granted") {
-      console.log("🔔 Notifications enabled!");
+ useEffect(() => {
+  const registerSWAndGetToken = async () => {
+    if (!('serviceWorker' in navigator)) return;
 
-      getToken(messaging, {
+    try {
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      console.log('✅ Service Worker registered!', registration.scope);
+
+      const token = await getToken(messaging, {
         vapidKey: "BKgVfGm2DlHqsa32LgTjutDCfifmC0YMAw6lmggq6Ry1qMuehVVql2qhUE_Z0hdFRbfc0ePof3LDIRyQQ9WAKww",
-      }).then((currentToken) => {
-        if (currentToken) {
-          console.log("📌 FCM Token:", currentToken);
-          // ابعتي التوكن دا للسيرفر لو عندك واحد
-        }
+        serviceWorkerRegistration: registration
       });
+
+      if (token) {
+        console.log("📌 FCM Token:", token);
+        // ابعتيه للسيرفر أو خزنيه في Firestore
+      }
+    } catch (err) {
+      console.error('❌ SW registration or token failed:', err);
     }
+  };
+
+  Notification.requestPermission().then((permission) => {
+    if (permission === 'granted') registerSWAndGetToken();
   });
 
-  // استقبال إشعار لما الأب مفتوح
   onMessage(messaging, (payload) => {
     console.log("🔴 Incoming message:", payload);
-    alert(payload.notification?.title);
+    alert(payload.notification?.title + "\n" + payload.notification?.body);
   });
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
-          .then((registration) => {
-            console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
-          })
-          .catch((error) => {
-            console.log('❌ فشل تسجيل Service Worker:', error);
-          });
-      });
-    }
-  }, []);
+}, []);
+
 
   // Screen handlers
   const handleGetStarted = () => setCurrentScreen('login');
