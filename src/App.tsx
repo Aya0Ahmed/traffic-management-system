@@ -25,30 +25,33 @@ export default function App() {
 useEffect(() => {
   const registerForNotifications = async (userId: string, token: string) => {
     try {
-      // Implement saving the token to your server or Firestore here.
-      // Avoid using undefined identifiers (setDoc, doc, db) unless imported and configured.
       console.log("✅ Pretend to save token for user:", userId, token);
+      // هنا ممكن تحفظ التوكن على السيرفر أو Firestore
     } catch (err) {
       console.log("❌ Save token error:", err);
     }
- };
+  };
 
   const registerSWAndGetToken = async () => {
     if (!('serviceWorker' in navigator)) return;
 
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
+      // تسجيل الـ SW
+      const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
       console.log('✅ Service Worker registered!', registration.scope);
 
+      // الانتظار حتى يكون الـ SW fully active
+      const readyRegistration = await navigator.serviceWorker.ready;
+
+      // طلب التوكن بعد تفعيل الـ SW
       const token = await getToken(messaging, {
         vapidKey: "BKgVfGm2DlHqsa32LgTjutDCfifmC0YMAw6lmggq6Ry1qMuehVVql2qhUE_Z0hdFRbfc0ePof3LDIRyQQ9WAKww",
-        serviceWorkerRegistration: registration
+        serviceWorkerRegistration: readyRegistration
       });
 
       if (token) {
         console.log("📌 FCM Token:", token);
         registerForNotifications("testUser1", token);
-        // ابعتيه للسيرفر أو خزنيه في Firestore
       }
     } catch (err) {
       console.error('❌ SW registration or token failed:', err);
@@ -59,6 +62,7 @@ useEffect(() => {
     if (permission === 'granted') registerSWAndGetToken();
   });
 
+  // استقبال الرسائل
   onMessage(messaging, (payload) => {
     console.log("🔴 Incoming message:", payload);
     alert(payload.notification?.title + "\n" + payload.notification?.body);
