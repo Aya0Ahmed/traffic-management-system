@@ -27,7 +27,7 @@ export default function App() {
     if (!('serviceWorker' in navigator)) return;
 
     try {
-      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      const registration = await navigator.serviceWorker.register('/sw.js');
       console.log('✅ Service Worker registered!', registration.scope);
 
       const token = await getToken(messaging, {
