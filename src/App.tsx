@@ -21,8 +21,18 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('map');
   const [notificationCount] = useState(3);
 
-  // تسجيل Service Worker للـ PWA
- useEffect(() => {
+// تسجيل Service Worker للـ PWA
+useEffect(() => {
+  const registerForNotifications = async (userId: string, token: string) => {
+    try {
+      // Implement saving the token to your server or Firestore here.
+      // Avoid using undefined identifiers (setDoc, doc, db) unless imported and configured.
+      console.log("✅ Pretend to save token for user:", userId, token);
+    } catch (err) {
+      console.log("❌ Save token error:", err);
+    }
+ };
+
   const registerSWAndGetToken = async () => {
     if (!('serviceWorker' in navigator)) return;
 
@@ -37,6 +47,7 @@ export default function App() {
 
       if (token) {
         console.log("📌 FCM Token:", token);
+        registerForNotifications("testUser1", token);
         // ابعتيه للسيرفر أو خزنيه في Firestore
       }
     } catch (err) {
