@@ -16,7 +16,7 @@ const app = initializeApp(firebaseConfig);
 // تسجيل Service Worker أولًا
 export const registerServiceWorker = async () => {
   try {
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const registration = await navigator.serviceWorker.register('/sw.js');
     console.log('Service Worker registered!', registration);
     return registration;
   } catch (err) {
